@@ -3,6 +3,7 @@ package com.rafaeldeluca.dscommerce.services;
 import com.rafaeldeluca.dscommerce.dto.ProductDTO;
 import com.rafaeldeluca.dscommerce.entities.Product;
 import com.rafaeldeluca.dscommerce.repositories.ProductRepository;
+import com.rafaeldeluca.dscommerce.services.exceptions.ResourceNotFoundException;
 import com.rafaeldeluca.dscommerce.tests.ProductFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,10 @@ public class ProductServiceTests {
         Mockito.when(productRepository.findById(existingProductId)).thenReturn(Optional.of(product));
         Mockito.when(productRepository.findById(existingProductId)).thenReturn(Optional.of(product2));
 
+        // to non existing Id
+        //Mockito.when(productRepository.findById(nonExistingProductId)).thenThrow(ResourceNotFoundException.class);
+        Mockito.when(productRepository.findById(nonExistingProductId)).thenReturn(Optional.empty());
+
     }
 
     @Test
@@ -58,6 +63,17 @@ public class ProductServiceTests {
 
         Assertions.assertEquals(result.getPrice(), product2.getPrice());
         Assertions.assertEquals(result.getImgUrl(), product2.getImgUrl());
+    }
+
+    @Test
+    public void findByIdShouldReturnResourceNotFoundExceptionWhenIdDoesNotExist () {
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+
+            productService.findById(nonExistingProductId);
+
+        });
+
     }
 
 
