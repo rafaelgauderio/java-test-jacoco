@@ -1,6 +1,7 @@
 package com.rafaeldeluca.dscommerce.services;
 
 import com.rafaeldeluca.dscommerce.dto.ProductDTO;
+import com.rafaeldeluca.dscommerce.dto.ProductMinDTO;
 import com.rafaeldeluca.dscommerce.entities.Product;
 import com.rafaeldeluca.dscommerce.repositories.ProductRepository;
 import com.rafaeldeluca.dscommerce.services.exceptions.ResourceNotFoundException;
@@ -12,24 +13,30 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.List;
 import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(SpringExtension.class)
 public class ProductServiceTests {
 
     @InjectMocks
     private ProductService productService;
-
     @Mock
     private ProductRepository productRepository;
-
     private Long existingProductId, nonExistingProductId;
     private Product product;
-
     private Product product2;
     private String productName;
+    private PageImpl<Product> pageImpl;
 
     @BeforeEach
     void setUp () throws Exception {
@@ -40,15 +47,18 @@ public class ProductServiceTests {
         productName = "Tablet Sansung";
 
         product = ProductFactory.createProduct(productName);
-
         product2 = ProductFactory.createProduct();
+
+        pageImpl = new PageImpl<Product>(List.of(product));
+
 
         Mockito.when(productRepository.findById(existingProductId)).thenReturn(Optional.of(product));
         Mockito.when(productRepository.findById(existingProductId)).thenReturn(Optional.of(product2));
-
         // to non existing Id
         //Mockito.when(productRepository.findById(nonExistingProductId)).thenThrow(ResourceNotFoundException.class);
         Mockito.when(productRepository.findById(nonExistingProductId)).thenReturn(Optional.empty());
+
+        Mockito.when(productRepository.searchByName(any(),(Pageable) any())).thenReturn(pageImpl);
 
     }
 
@@ -73,8 +83,17 @@ public class ProductServiceTests {
             productService.findById(nonExistingProductId);
 
         });
-
     }
 
+    @Test
+    public void findByIdShouldReturnPagedProductMinDTO () {
+        Pageable pageable = PageRequest.of(0,24);
 
+        Page<ProductMinDTO> serviceResult = productService.findAll(productName, pageable);
+
+        Assertions.assertNotNull(serviceResult);
+        Assertions.assertEquals(serviceResult.getSize(),1);
+        Assertions.assertEquals(serviceResult.iterator().next().getName(), productName);
+
+    }
 }
