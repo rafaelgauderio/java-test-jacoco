@@ -94,6 +94,15 @@ public class ProductServiceTests {
         Assertions.assertNotNull(serviceResult);
         Assertions.assertEquals(serviceResult.getSize(),1);
         Assertions.assertEquals(serviceResult.iterator().next().getName(), productName);
+    }
 
+    @Test
+    public void findByIdShouldReturnPagedProductMinDTOWithNullPageable () {
+
+        Page<ProductMinDTO> serviceResult = productService.findAll(productName, null);
+
+        Assertions.assertNotNull(serviceResult);
+        Assertions.assertEquals(serviceResult.getSize(),1);
+        Assertions.assertEquals(serviceResult.iterator().next().getName(), productName);
     }
 }
