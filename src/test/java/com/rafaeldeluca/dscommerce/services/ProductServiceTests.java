@@ -6,6 +6,7 @@ import com.rafaeldeluca.dscommerce.entities.Product;
 import com.rafaeldeluca.dscommerce.repositories.ProductRepository;
 import com.rafaeldeluca.dscommerce.services.exceptions.ResourceNotFoundException;
 import com.rafaeldeluca.dscommerce.tests.ProductFactory;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,16 +56,19 @@ public class ProductServiceTests {
 
         pageImpl = new PageImpl<Product>(List.of(product));
 
-
+        // mock data to the method findById or searchByname
         Mockito.when(productRepository.findById(existingProductId)).thenReturn(Optional.of(product));
         Mockito.when(productRepository.findById(existingProductId)).thenReturn(Optional.of(product2));
-        // to non existing Id
         //Mockito.when(productRepository.findById(nonExistingProductId)).thenThrow(ResourceNotFoundException.class);
         Mockito.when(productRepository.findById(nonExistingProductId)).thenReturn(Optional.empty());
-
         Mockito.when(productRepository.searchByName(any(),(Pageable) any())).thenReturn(pageImpl);
 
+        // mock data to insert
         Mockito.when(productRepository.save(any())).thenReturn(product);
+
+        // mock data to update product with existingId and NotFoundId
+        Mockito.when(productRepository.getReferenceById(existingProductId)).thenReturn(product);
+        Mockito.when(productRepository.getReferenceById(nonExistingProductId)).thenThrow(EntityNotFoundException.class);
 
     }
 
@@ -120,5 +124,17 @@ public class ProductServiceTests {
         Assertions.assertNotNull(serviceResult);
         Assertions.assertEquals(serviceResult.getId(), product.getId());
         Assertions.assertEquals(serviceResult.getName(), product.getName());
+    }
+
+    @Test
+    public void updateProductShouldReturnProducDTOWithExistingId () {
+
+        ProductDTO serviceResult = productService.update(existingProductId,productDTO);
+
+        Assertions.assertNotNull(serviceResult);
+        Assertions.assertEquals(serviceResult.getId(), existingProductId);
+        Assertions.assertEquals(serviceResult.getName(), productDTO.getName());
+
+
     }
 }
