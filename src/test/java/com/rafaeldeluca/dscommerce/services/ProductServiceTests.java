@@ -127,14 +127,21 @@ public class ProductServiceTests {
     }
 
     @Test
-    public void updateProductShouldReturnProducDTOWithExistingId () {
+    public void updateProductShouldReturnProductDTOWithExistingId () {
 
         ProductDTO serviceResult = productService.update(existingProductId,productDTO);
 
         Assertions.assertNotNull(serviceResult);
         Assertions.assertEquals(serviceResult.getId(), existingProductId);
         Assertions.assertEquals(serviceResult.getName(), productDTO.getName());
+    }
 
+    @Test
+    public void updateProductShouldReturnProductDTOWWithNonExistingId () {
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            productService.update(nonExistingProductId, productDTO);
+        });
 
     }
 }
