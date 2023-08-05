@@ -48,6 +48,7 @@ public class ProductServiceTests {
 
         existingProductId = 2L;
         nonExistingProductId = 50L;
+        dependentProductId =1L;
 
         productName = "Tablet Sansung";
 
