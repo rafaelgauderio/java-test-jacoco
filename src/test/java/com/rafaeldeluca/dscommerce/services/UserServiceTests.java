@@ -5,11 +5,15 @@ import com.rafaeldeluca.dscommerce.projections.UserDetailsProjection;
 import com.rafaeldeluca.dscommerce.repositories.UserRepository;
 import com.rafaeldeluca.dscommerce.tests.UserDetailsFactory;
 import com.rafaeldeluca.dscommerce.tests.UserFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
@@ -41,6 +45,14 @@ public class UserServiceTests {
 
     }
 
+    @Test
+    public void loadUserByUsernameShouldReturnUserDetailsProjectionListWhenUserExists () {
+        UserDetails serviceResult = userService.loadUserByUsername(existingUserName);
 
+        Assertions.assertNotNull(serviceResult);
+        Assertions.assertEquals(serviceResult.getUsername(), existingUserName);
+    }
+
+    
 
 }
