@@ -168,4 +168,11 @@ public class ProductServiceTests {
            productService.delete(nonExistingProductId);
         });
     }
+
+    @Test
+    public void deleteShouldReturnDataBaseExceptionWhenProductIdIsDepend () {
+        Assertions.assertThrows(DatabaseException.class, () -> {
+            productService.delete(dependentProductId);
+        });
+    }
 }
