@@ -27,30 +27,44 @@ public class UserServiceTests {
     private UserRepository userRepository;
     @InjectMocks
     private UserService userService;
-    private User user;
-    private String existingUserName, nonExistingUsername;
-    private List<UserDetailsProjection> userDetailsProjectionList;
+    private User userClient;
+    private User userAdmin;
+    private String existingUserNameClient, existingUserNameAdmin, nonExistingUsername;
+    private List<UserDetailsProjection> userDetailsProjectionList, userDetailsProjectionListAdmin;
 
     @BeforeEach
     public void setUp () throws Exception {
 
-        existingUserName = "juliana@gmail.com";
+        existingUserNameClient = "juliana@gmail.com";
+        existingUserNameAdmin = "deluca1712@gmail.com";
         nonExistingUsername = "rafaeldeluca@gmail.com";
 
-        user = UserFactory.createCustomUserClient(1L, existingUserName);
-        userDetailsProjectionList = UserDetailsFactory.createCustomAdminUserList(existingUserName);
+        userClient = UserFactory.createCustomUserClient(1L, existingUserNameClient);
+        userAdmin = UserFactory.createCustomAdminUser(5L,existingUserNameAdmin);
 
-        Mockito.when(userRepository.searchUserAndRolesByEmail(existingUserName)).thenReturn(userDetailsProjectionList);
+        userDetailsProjectionList = UserDetailsFactory.createCustomClientUserList(existingUserNameClient);
+        userDetailsProjectionListAdmin = UserDetailsFactory.createCustomClientUserList(existingUserNameAdmin);
+
+        Mockito.when(userRepository.searchUserAndRolesByEmail(existingUserNameClient)).thenReturn(userDetailsProjectionList);
+        Mockito.when(userRepository.searchUserAndRolesByEmail(existingUserNameAdmin)).thenReturn(userDetailsProjectionListAdmin);
         Mockito.when(userRepository.searchUserAndRolesByEmail(nonExistingUsername)).thenReturn(Collections.EMPTY_LIST);
 
     }
 
     @Test
-    public void loadUserByUsernameShouldReturnUserDetailsProjectionListWhenUserExists () {
-        UserDetails serviceResult = userService.loadUserByUsername(existingUserName);
+    public void loadUserByUsernameShouldReturnUserDetailsProjectionListWhenUserClientExists () {
+        UserDetails serviceResult = userService.loadUserByUsername(existingUserNameClient);
 
         Assertions.assertNotNull(serviceResult);
-        Assertions.assertEquals(serviceResult.getUsername(), existingUserName);
+        Assertions.assertEquals(serviceResult.getUsername(), existingUserNameClient);
+    }
+
+    @Test
+    public void loadUserByUsernameShouldReturnUserDetailsProjectionListWhenUserAdminExists () {
+        UserDetails serviceResult = userService.loadUserByUsername(existingUserNameAdmin);
+
+        Assertions.assertNotNull(serviceResult);
+        Assertions.assertEquals(serviceResult.getUsername(), existingUserNameAdmin);
     }
 
     @Test
