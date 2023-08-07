@@ -5,6 +5,7 @@ import com.rafaeldeluca.dscommerce.projections.UserDetailsProjection;
 import com.rafaeldeluca.dscommerce.repositories.UserRepository;
 import com.rafaeldeluca.dscommerce.tests.UserDetailsFactory;
 import com.rafaeldeluca.dscommerce.tests.UserFactory;
+import com.rafaeldeluca.dscommerce.utils.CustomUserUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
 public class UserServiceTests {
@@ -25,8 +27,12 @@ public class UserServiceTests {
     //inserindindo as dependências
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private CustomUserUtil customUserUtil;
     @InjectMocks
     private UserService userService;
+
     private User userClient;
     private User userAdmin;
     private String existingUserNameClient, existingUserNameAdmin, nonExistingUsername;
@@ -48,6 +54,11 @@ public class UserServiceTests {
         Mockito.when(userRepository.searchUserAndRolesByEmail(existingUserNameClient)).thenReturn(userDetailsProjectionList);
         Mockito.when(userRepository.searchUserAndRolesByEmail(existingUserNameAdmin)).thenReturn(userDetailsProjectionListAdmin);
         Mockito.when(userRepository.searchUserAndRolesByEmail(nonExistingUsername)).thenReturn(Collections.EMPTY_LIST);
+
+        // simulando buscar usuário por email
+        Mockito.when(userRepository.findByEmail(existingUserNameAdmin)).thenReturn(Optional.of(userAdmin));
+        Mockito.when(userRepository.findByEmail(existingUserNameClient)).thenReturn(Optional.of(userClient));
+        Mockito.when(userRepository.findByEmail(nonExistingUsername)).thenReturn(Optional.empty());
 
     }
 
@@ -73,6 +84,17 @@ public class UserServiceTests {
         Assertions.assertThrows(UsernameNotFoundException.class, () -> {
             userService.loadUserByUsername(nonExistingUsername);
         });
+    }
+
+    @Test
+    public void authenticatedShouldReturnUserAdminWhenUserAdminExists () {
+
+        Mockito.when(customUserUtil.getLoggedUsername()).thenReturn(existingUserNameAdmin);
+
+        User serviceResult = userService.authenticated();
+
+        Assertions.assertNotNull(serviceResult);
+        Assertions.assertEquals(serviceResult.getUsername(), existingUserNameAdmin);
     }
 
 
