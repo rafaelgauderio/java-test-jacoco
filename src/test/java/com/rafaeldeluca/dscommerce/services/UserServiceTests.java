@@ -97,6 +97,13 @@ public class UserServiceTests {
         Assertions.assertEquals(serviceResult.getUsername(), existingUserNameAdmin);
     }
 
+    @Test
+    public void authenticatedShouldReturnUserClientWhenUserClientExists () {
+        Mockito.when(customUserUtil.getLoggedUsername()).thenReturn(existingUserNameClient);
 
+        User serviceResult = userService.authenticated();
 
+        Assertions.assertNotNull(serviceResult);
+        Assertions.assertEquals(serviceResult.getUsername(),existingUserNameClient);
+    }   ''
 }
