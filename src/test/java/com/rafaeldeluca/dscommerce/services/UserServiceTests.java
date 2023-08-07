@@ -105,5 +105,16 @@ public class UserServiceTests {
 
         Assertions.assertNotNull(serviceResult);
         Assertions.assertEquals(serviceResult.getUsername(),existingUserNameClient);
-    }   ''
+    }
+
+    @Test
+    public void authenticatedShouldThrowUsernameNotFoundExceptionWhenUserDoesNotExists () {
+        // se o usuário não existir vai dar um exceção de casting ao tentar converter
+        // Authentication para Jwt
+        Mockito.doThrow(ClassCastException.class).when(customUserUtil).getLoggedUsername();
+
+        Assertions.assertThrows(UsernameNotFoundException.class, () -> {
+           userService.authenticated();
+        });
+    }
 }
