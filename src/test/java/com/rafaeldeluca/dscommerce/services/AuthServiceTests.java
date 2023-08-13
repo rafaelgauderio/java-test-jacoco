@@ -37,5 +37,18 @@ public class AuthServiceTests {
             authService.validateSelfOrAdmin(userId);
         });
     }
+
+    @Test
+    public void validateSelfOrAdminShouldDoNotThrowExceptionWhenUserLoggedAsSelfClient () {
+        Mockito.when(userService.authenticated()).thenReturn(selClient);
+
+        Long userClientId = selClient.getId();
+
+        Assertions.assertDoesNotThrow( () -> {
+            authService.validateSelfOrAdmin(userClientId);
+        });
+    }
+
+    
 }
 ;
