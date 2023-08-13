@@ -1,6 +1,7 @@
 package com.rafaeldeluca.dscommerce.services;
 
 import com.rafaeldeluca.dscommerce.entities.User;
+import com.rafaeldeluca.dscommerce.services.exceptions.ForbiddenException;
 import com.rafaeldeluca.dscommerce.tests.UserFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +19,12 @@ public class AuthServiceTests {
     private AuthService authService;
     @Mock
     private UserService userService;
-    private User admin, selClient, differentClient;
+    private User admin, selfClient, differentClient;
 
     @BeforeEach
     void setUp () throws Exception {
         admin = UserFactory.createAdminUser();
-        selClient = UserFactory.createCustomUserClient(1L,"Claúdia");
+        selfClient = UserFactory.createCustomUserClient(1L,"Claúdia");
         differentClient = UserFactory.createCustomUserClient(2L,"Ana Carolina");
     }
 
@@ -40,15 +41,24 @@ public class AuthServiceTests {
 
     @Test
     public void validateSelfOrAdminShouldDoNotThrowExceptionWhenUserLoggedAsSelfClient () {
-        Mockito.when(userService.authenticated()).thenReturn(selClient);
+        Mockito.when(userService.authenticated()).thenReturn(selfClient);
 
-        Long userClientId = selClient.getId();
+        Long userClientId = selfClient.getId();
 
         Assertions.assertDoesNotThrow( () -> {
             authService.validateSelfOrAdmin(userClientId);
         });
     }
 
-    
+    @Test
+    public void validateSelfOrAdminShoudlThrowsForbiddenExceptionWhenUserLoggedAsDifferentClient () {
+        Mockito.when(userService.authenticated()).thenReturn(selfClient);
+
+        Long userDifferentClientId = differentClient.getId();
+
+        // trying to access order from different client is not allowed
+        Assertions.assertThrows( ForbiddenException.class, () -> {
+           authService.validateSelfOrAdmin(userDifferentClientId);
+        });
+    }
 }
-;
