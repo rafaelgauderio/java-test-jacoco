@@ -4,6 +4,7 @@ import com.rafaeldeluca.dscommerce.dto.OrderDTO;
 import com.rafaeldeluca.dscommerce.entities.Order;
 import com.rafaeldeluca.dscommerce.entities.User;
 import com.rafaeldeluca.dscommerce.repositories.OrderRepository;
+import com.rafaeldeluca.dscommerce.services.exceptions.ForbiddenException;
 import com.rafaeldeluca.dscommerce.tests.OrderFactory;
 import com.rafaeldeluca.dscommerce.tests.UserFactory;
 import org.junit.jupiter.api.Assertions;
@@ -60,7 +61,7 @@ public class OrderServiceTests {
     }
 
     @Test
-    public void findByIdShouldReturnOrderDTOWhenIdExistisAndUserLoggedAsAdmin () {
+    public void findByIdShouldReturnOrderDTOWhenIdExistsAndUserLoggedAsAdmin () {
         // admin pode consultar o pedido de todos os usuários
         //Mockito.doNothing().when(authService).validateSelfOrAdmin(userAdmin.getId());
         Mockito.doNothing().when(authService).validateSelfOrAdmin(any());
@@ -69,6 +70,16 @@ public class OrderServiceTests {
 
         Assertions.assertNotNull(orderDTO);
         Assertions.assertEquals(orderDTO.getId(), existingOrderId);
+    }
+
+    @Test
+    public void findByIdShouldReturnThrowsForbiddenExceptionWhenIdExistsAndUerLoggedAsClientTryToAccessNotSelfOrder () {
+        // usuario logado como cliente não pode acessar os pedidos de outros usuários
+        Mockito.doThrow(ForbiddenException.class).when(authService).validateSelfOrAdmin(userClient.getId());
+
+        Assertions.assertThrows(ForbiddenException.class, () -> {
+           OrderDTO orderDTO = orderService.findById(existingOrderId);
+        });
     }
 
 }
