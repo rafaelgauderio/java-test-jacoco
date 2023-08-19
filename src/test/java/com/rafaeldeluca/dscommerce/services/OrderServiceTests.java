@@ -88,7 +88,7 @@ public class OrderServiceTests {
         Mockito.doThrow(ResourceNotFoundException.class).when(authService).validateSelfOrAdmin(any());
 
         Assertions.assertThrows(ResourceNotFoundException.class, ()-> {
-           OrderDTO orderDTO = orderService.findById(existingOrderId);
+           OrderDTO orderDTO = orderService.findById(nonExistingOrderId);
         });
 
     }
