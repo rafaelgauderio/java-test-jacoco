@@ -8,6 +8,9 @@ import com.rafaeldeluca.dscommerce.tests.OrderFactory;
 import com.rafaeldeluca.dscommerce.tests.UserFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+
+import java.util.Optional;
 
 public class OrderServiceTests {
 
@@ -36,6 +39,12 @@ public class OrderServiceTests {
         userAdmin = UserFactory.createCustomAdminUser(2l, userNameAdmin);
 
         order = OrderFactory.createOrder(userClient);
+
+        orderDTO = new OrderDTO(order);
+
+        // mocando buscar pedido por Id
+        Mockito.when(orderRepository.findById(existingOrderId)).thenReturn(Optional.of(order));
+        Mockito.when(orderRepository.findById(nonExistingOrderId)).thenReturn(Optional.empty());
 
     }
 
