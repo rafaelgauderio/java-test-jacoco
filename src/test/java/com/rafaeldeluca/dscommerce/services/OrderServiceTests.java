@@ -6,16 +6,27 @@ import com.rafaeldeluca.dscommerce.entities.User;
 import com.rafaeldeluca.dscommerce.repositories.OrderRepository;
 import com.rafaeldeluca.dscommerce.tests.OrderFactory;
 import com.rafaeldeluca.dscommerce.tests.UserFactory;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+
+@ExtendWith(SpringExtension.class)
 public class OrderServiceTests {
 
     @Mock
     private OrderRepository orderRepository;
+
+    @Mock
+    private AuthService authService;
 
     // com injectMock tem que usar a funcao Mockito.spy() para simular os dados mockados
     @InjectMocks
@@ -27,7 +38,8 @@ public class OrderServiceTests {
     private Order order;
     private OrderDTO orderDTO;
 
-    void setUp ( ) {
+    @BeforeEach
+    void setUp () throws Exception {
 
         userNameClient = "juliana@gmail.com";
         userNameAdmin = "deluca1712@gmail.com";
@@ -45,7 +57,18 @@ public class OrderServiceTests {
         // mocando buscar pedido por Id
         Mockito.when(orderRepository.findById(existingOrderId)).thenReturn(Optional.of(order));
         Mockito.when(orderRepository.findById(nonExistingOrderId)).thenReturn(Optional.empty());
+    }
 
+    @Test
+    public void findByIdShouldReturnOrderDTOWhenIdExistisAndUserLoggedAsAdmin () {
+        // admin pode consultar o pedido de todos os usuários
+        //Mockito.doNothing().when(authService).validateSelfOrAdmin(userAdmin.getId());
+        Mockito.doNothing().when(authService).validateSelfOrAdmin(any());
+
+        OrderDTO orderDTO = orderService.findById(existingOrderId);
+
+        Assertions.assertNotNull(orderDTO);
+        Assertions.assertEquals(orderDTO.getId(), existingOrderId);
     }
 
 }
