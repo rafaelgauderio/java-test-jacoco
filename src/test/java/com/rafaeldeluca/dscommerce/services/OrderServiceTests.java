@@ -5,6 +5,7 @@ import com.rafaeldeluca.dscommerce.entities.Order;
 import com.rafaeldeluca.dscommerce.entities.User;
 import com.rafaeldeluca.dscommerce.repositories.OrderRepository;
 import com.rafaeldeluca.dscommerce.services.exceptions.ForbiddenException;
+import com.rafaeldeluca.dscommerce.services.exceptions.ResourceNotFoundException;
 import com.rafaeldeluca.dscommerce.tests.OrderFactory;
 import com.rafaeldeluca.dscommerce.tests.UserFactory;
 import org.junit.jupiter.api.Assertions;
@@ -80,6 +81,16 @@ public class OrderServiceTests {
         Assertions.assertThrows(ForbiddenException.class, () -> {
            OrderDTO orderDTO = orderService.findById(existingOrderId);
         });
+    }
+
+    @Test
+    public void findByIdShouldReturnThrowsResourceNotFoundExceptionWhenIdOrderDoNotExists () {
+        Mockito.doThrow(ResourceNotFoundException.class).when(authService).validateSelfOrAdmin(any());
+
+        Assertions.assertThrows(ResourceNotFoundException.class, ()-> {
+           OrderDTO orderDTO = orderService.findById(existingOrderId);
+        });
+
     }
 
 }
