@@ -124,6 +124,8 @@ public class UserServiceTests {
 
         // service não é um mock, é um injectMock como annotation, pois
         // é a classe onde estamos testando os métodos
+        // se usou annotaion Mock usar direto o mockito
+        // se usou anootatation InjectMock tem que usar o spy para simular a injecao de dependencia
         //Mockito.doReturn(userClient).when(userService).authenticated();
 
         // usar o spy permite encapsular o objeto userService que queremos mockar
@@ -136,5 +138,17 @@ public class UserServiceTests {
 
         Assertions.assertNotNull(serviceResult);
         Assertions.assertEquals(serviceResult.getEmail(), existingUserNameClient);
+    }
+
+    @Test
+    public void getMeShouldReturnUsernameNotFoundExceptionWhenUSerClientIsNotAuthenticated () {
+
+       UserService spyUserService = Mockito.spy(userService);
+       Mockito.doThrow(UsernameNotFoundException.class).when(spyUserService).authenticated();
+
+       Assertions.assertThrows(UsernameNotFoundException.class, () -> {
+           UserDTO serviceResult = spyUserService.getMe();
+       });
+
     }
 }
