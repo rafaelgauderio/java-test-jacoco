@@ -1,5 +1,6 @@
 package com.rafaeldeluca.dscommerce.services;
 
+import com.rafaeldeluca.dscommerce.dto.UserDTO;
 import com.rafaeldeluca.dscommerce.entities.User;
 import com.rafaeldeluca.dscommerce.projections.UserDetailsProjection;
 import com.rafaeldeluca.dscommerce.repositories.UserRepository;
@@ -116,5 +117,24 @@ public class UserServiceTests {
         Assertions.assertThrows(UsernameNotFoundException.class, () -> {
            userService.authenticated();
         });
+    }
+
+    @Test
+    public void getMeShouldReturnUserDTOWhenUserClientIsAuthenticated () {
+
+        // service não é um mock, é um injectMock como annotation, pois
+        // é a classe onde estamos testando os métodos
+        //Mockito.doReturn(userClient).when(userService).authenticated();
+
+        // usar o spy permite encapsular o objeto userService que queremos mockar
+        // spu 'espiona' o objeto real
+        UserService spyUserService = Mockito.spy(userService);
+        Mockito.doReturn(userClient).when(spyUserService).authenticated();
+
+        //UserDTO serviceResult = userService.getMe();
+        UserDTO serviceResult = spyUserService.getMe();
+
+        Assertions.assertNotNull(serviceResult);
+        Assertions.assertEquals(serviceResult.getEmail(), existingUserNameClient);
     }
 }
