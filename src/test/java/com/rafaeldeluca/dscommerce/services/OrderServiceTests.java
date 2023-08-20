@@ -56,7 +56,7 @@ public class OrderServiceTests {
     private Long existingProductId, nonExistingProductId;
     private Order order, orderAdmin;
     private OrderDTO orderDTO, orderDTOAdmin;
-    private Product product;
+    private Product product, product2;
 
     @BeforeEach
     void setUp () throws Exception {
@@ -74,12 +74,14 @@ public class OrderServiceTests {
         userAdmin = UserFactory.createCustomAdminUser(2l, userNameAdmin);
 
         order = OrderFactory.createOrder(userClient);
+
         orderAdmin = OrderFactory.createOrder(userAdmin);
 
         orderDTO = new OrderDTO(order);
         orderDTOAdmin = new OrderDTO(orderAdmin);
 
         product = ProductFactory.createProduct();
+        product2 = ProductFactory.createProduct();
 
         // mocando buscar pedido por Id
         Mockito.when(orderRepository.findById(existingOrderId)).thenReturn(Optional.of(order));
@@ -134,10 +136,10 @@ public class OrderServiceTests {
         // mockar usuário autenticado como admin
         Mockito.when(userService.authenticated()).thenReturn(userAdmin);
 
-        OrderDTO result = orderService.insert(orderDTO);
+        OrderDTO result = orderService.insert(orderDTOAdmin);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(result.getId(), existingOrderId);
+        Assertions.assertEquals(result.getItems().size(),1);
 
     }
 
@@ -147,10 +149,9 @@ public class OrderServiceTests {
         Mockito.when(userService.authenticated()).thenReturn(userClient);
 
         OrderDTO result = orderService.insert(orderDTO);
-
+        Assertions.assertEquals(result.getItems().size(),1);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(result.getId(), existingOrderId);
     }
 
     @Test
@@ -182,8 +183,5 @@ public class OrderServiceTests {
         Assertions.assertThrows(EntityNotFoundException.class, () -> {
             OrderDTO orderServiceResult = orderService.insert(orderDTO);
         });
-
     }
-
-
 }
