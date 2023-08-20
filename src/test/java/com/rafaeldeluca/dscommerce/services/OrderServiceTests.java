@@ -2,12 +2,18 @@ package com.rafaeldeluca.dscommerce.services;
 
 import com.rafaeldeluca.dscommerce.dto.OrderDTO;
 import com.rafaeldeluca.dscommerce.entities.Order;
+import com.rafaeldeluca.dscommerce.entities.OrderItem;
+import com.rafaeldeluca.dscommerce.entities.Product;
 import com.rafaeldeluca.dscommerce.entities.User;
+import com.rafaeldeluca.dscommerce.repositories.OrderItemRepository;
 import com.rafaeldeluca.dscommerce.repositories.OrderRepository;
+import com.rafaeldeluca.dscommerce.repositories.ProductRepository;
 import com.rafaeldeluca.dscommerce.services.exceptions.ForbiddenException;
 import com.rafaeldeluca.dscommerce.services.exceptions.ResourceNotFoundException;
 import com.rafaeldeluca.dscommerce.tests.OrderFactory;
+import com.rafaeldeluca.dscommerce.tests.ProductFactory;
 import com.rafaeldeluca.dscommerce.tests.UserFactory;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Optional;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -30,6 +36,15 @@ public class OrderServiceTests {
     @Mock
     private AuthService authService;
 
+    @Mock
+    private ProductRepository productRepository;
+
+    @Mock
+    private OrderItemRepository orderItemRepository;
+
+    @Mock
+    private UserService userService;
+
     // com injectMock tem que usar a funcao Mockito.spy() para simular os dados mockados
     @InjectMocks
     private OrderService orderService;
@@ -37,8 +52,10 @@ public class OrderServiceTests {
     private String userNameClient, userNameAdmin;
     private User userClient, userAdmin;
     private Long existingOrderId, nonExistingOrderId;
+    private Long existingProductId, nonExistingProductId;
     private Order order;
     private OrderDTO orderDTO;
+    private Product productDefault;
 
     @BeforeEach
     void setUp () throws Exception {
@@ -49,6 +66,9 @@ public class OrderServiceTests {
         existingOrderId = 1L;
         nonExistingOrderId = 50L;
 
+        existingProductId = 1l;
+        nonExistingProductId = 50L;
+
         userClient = UserFactory.createCustomUserClient(1L, userNameClient);
         userAdmin = UserFactory.createCustomAdminUser(2l, userNameAdmin);
 
@@ -56,9 +76,21 @@ public class OrderServiceTests {
 
         orderDTO = new OrderDTO(order);
 
+        productDefault = ProductFactory.createProduct();
+
         // mocando buscar pedido por Id
         Mockito.when(orderRepository.findById(existingOrderId)).thenReturn(Optional.of(order));
         Mockito.when(orderRepository.findById(nonExistingOrderId)).thenReturn(Optional.empty());
+
+        // mocando a busca de um produto por id
+        Mockito.when(productRepository.getReferenceById(existingProductId)).thenReturn(productDefault);
+        Mockito.when(productRepository.getReferenceById(nonExistingProductId)).thenThrow(EntityNotFoundException.class);
+
+        // mocando salvar um pedido
+        Mockito.when(orderRepository.save(any())).thenReturn(order);
+
+        // mocando salvar (adicionar) os itens do pedido no pedido
+        Mockito.when(orderItemRepository.saveAll(any())).thenReturn((new LinkedList<>(order.getItems())));
     }
 
     @Test
@@ -90,7 +122,6 @@ public class OrderServiceTests {
         Assertions.assertThrows(ResourceNotFoundException.class, ()-> {
            OrderDTO orderDTO = orderService.findById(nonExistingOrderId);
         });
-
     }
 
 }
