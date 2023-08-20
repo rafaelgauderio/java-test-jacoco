@@ -148,6 +148,7 @@ public class OrderServiceTests {
 
         OrderDTO result = orderService.insert(orderDTO);
 
+
         Assertions.assertNotNull(result);
         Assertions.assertEquals(result.getId(), existingOrderId);
     }
@@ -165,4 +166,24 @@ public class OrderServiceTests {
             OrderDTO orderServiceResult = orderService.insert(orderDTO);
         });
     }
+
+    @Test
+    public void insertShouldThrowsEntityNotFoundExceptionWhenOrderProductIdDoesNotExist () {
+
+        Mockito.when(userService.authenticated()).thenReturn(userClient);
+
+        // simulando um produto com id inexistente
+        product.setId(nonExistingProductId);
+        OrderItem orderItem = new OrderItem(order, product, 10, 2500.50);
+        order.getItems().add(orderItem);
+
+        orderDTO = new OrderDTO(order);
+
+        Assertions.assertThrows(EntityNotFoundException.class, () -> {
+            OrderDTO orderServiceResult = orderService.insert(orderDTO);
+        });
+
+    }
+
+
 }
