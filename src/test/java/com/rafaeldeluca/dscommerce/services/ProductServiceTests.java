@@ -46,9 +46,9 @@ public class ProductServiceTests {
     @BeforeEach
     void setUp () throws Exception {
 
-        existingProductId = 2L;
+        existingProductId = 1L;
         nonExistingProductId = 50L;
-        dependentProductId =1L;
+        dependentProductId =2L;
 
         productName = "Tablet Sansung";
 
