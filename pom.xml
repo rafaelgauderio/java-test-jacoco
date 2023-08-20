@@ -84,6 +84,8 @@
 						<exclude>com/rafaeldeluca/dscommerce/entities/**</exclude>
 						<exclude>com/rafaeldeluca/dscommerce/dto/**</exclude>
 						<exclude>com/rafaeldeluca/dscommerce/controllers/handlers/**</exclude>
+						<exclude>com/rafaeldeluca/dscommerce/controllers/**</exclude>
+						<exclude>com/rafaeldeluca/dscommerce/utils/**</exclude>
 						<exclude>com/rafaeldeluca/dscommerce/services/exceptions/**</exclude>
 					</excludes>
 				</configuration>
