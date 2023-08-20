@@ -53,9 +53,9 @@ public class OrderServiceTests {
     private User userClient, userAdmin;
     private Long existingOrderId, nonExistingOrderId;
     private Long existingProductId, nonExistingProductId;
-    private Order order;
-    private OrderDTO orderDTO;
-    private Product productDefault;
+    private Order order, orderAdmin;
+    private OrderDTO orderDTO, orderDTOAdmin;
+    private Product product;
 
     @BeforeEach
     void setUp () throws Exception {
@@ -73,24 +73,28 @@ public class OrderServiceTests {
         userAdmin = UserFactory.createCustomAdminUser(2l, userNameAdmin);
 
         order = OrderFactory.createOrder(userClient);
+        orderAdmin = OrderFactory.createOrder(userAdmin);
 
         orderDTO = new OrderDTO(order);
+        orderDTOAdmin = new OrderDTO(orderAdmin);
 
-        productDefault = ProductFactory.createProduct();
+        product = ProductFactory.createProduct();
 
         // mocando buscar pedido por Id
         Mockito.when(orderRepository.findById(existingOrderId)).thenReturn(Optional.of(order));
         Mockito.when(orderRepository.findById(nonExistingOrderId)).thenReturn(Optional.empty());
 
         // mocando a busca de um produto por id
-        Mockito.when(productRepository.getReferenceById(existingProductId)).thenReturn(productDefault);
+        Mockito.when(productRepository.getReferenceById(existingProductId)).thenReturn(product);
         Mockito.when(productRepository.getReferenceById(nonExistingProductId)).thenThrow(EntityNotFoundException.class);
 
         // mocando salvar um pedido
         Mockito.when(orderRepository.save(any())).thenReturn(order);
 
+
         // mocando salvar (adicionar) os itens do pedido no pedido
-        Mockito.when(orderItemRepository.saveAll(any())).thenReturn((new LinkedList<>(order.getItems())));
+        Mockito.when(orderItemRepository.saveAll(any())).thenReturn(new ArrayList<>(order.getItems()));
+
     }
 
     @Test
@@ -123,5 +127,30 @@ public class OrderServiceTests {
            OrderDTO orderDTO = orderService.findById(nonExistingOrderId);
         });
     }
+
+    @Test
+    public void insertShouldReturnOrderDTOWhenUserLoggedAsAdmin () {
+        // mockar usuário autenticado como admin
+        Mockito.when(userService.authenticated()).thenReturn(userAdmin);
+
+        OrderDTO result = orderService.insert(orderDTO);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(result.getId(), existingOrderId);
+
+    }
+
+    @Test
+    public void insertShouldReturnOrderDTOWhenUserLoggedAsClient() {
+        // mockar usuário autenticado como client
+        Mockito.when(userService.authenticated()).thenReturn(userClient);
+
+        OrderDTO result = orderService.insert(orderDTOAdmin);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(result.getId(), existingOrderId);
+    }
+
+
 
 }

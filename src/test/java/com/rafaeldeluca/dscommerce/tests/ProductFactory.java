@@ -7,7 +7,7 @@ public class ProductFactory {
 
     public static Product createProduct () {
         Category category = CategoryFactory.createCategory();
-        Product product = new Product(2L,"Tablet Sansung", "Table Sansung com 16 giga de memória", 4900.90,"https://www.sansung/tableImage.png");
+        Product product = new Product(1L,"Tablet Sansung", "Table Sansung com 16 giga de memória", 4900.90,"https://www.sansung/tableImage.png");
         product.getCategories().add(category);
         return product;
     }
@@ -15,6 +15,7 @@ public class ProductFactory {
     public static Product createProduct (String name) {
         Product product = ProductFactory.createProduct();
         product.setName(name);
+        product.setPrice(5000.50);
         return product;
     }
 }
