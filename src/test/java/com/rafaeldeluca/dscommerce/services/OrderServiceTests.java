@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
@@ -145,12 +146,23 @@ public class OrderServiceTests {
         // mockar usuário autenticado como client
         Mockito.when(userService.authenticated()).thenReturn(userClient);
 
-        OrderDTO result = orderService.insert(orderDTOAdmin);
+        OrderDTO result = orderService.insert(orderDTO);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(result.getId(), existingOrderId);
     }
 
+    @Test
+    public void insertShouldThrowsUserNameNotFountExceptionWhenUserNotLogged () {
+        // sem mockar usuário autenticado tem que retonar uma exeção
+        Mockito.doThrow(UsernameNotFoundException.class).when(userService).authenticated();
 
+        // usuário vazio
+        order.setClient(new User());
+        orderDTO = new OrderDTO(order);
 
+        Assertions.assertThrows(UsernameNotFoundException.class, ()-> {
+            OrderDTO orderServiceResult = orderService.insert(orderDTO);
+        });
+    }
 }
